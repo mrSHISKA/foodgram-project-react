@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 
@@ -55,13 +56,18 @@ class Recipe(models.Model):
         verbose_name='Теги',
     )
     cooking_time = models.PositiveIntegerField(
-        'Время приготовления в минутах'
+        'Время приготовления в минутах',
+        validators=[MinValueValidator(1)]
     )
 
     class Meta:
         ordering = ['-id']
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
+        constraints = [
+            UniqueConstraint(fields=['author', 'name'],
+                             name='unique_author_recipe')
+        ]
 
     def __str__(self):
         return f'{self.name}, {self.author}'
@@ -87,6 +93,10 @@ class IngredientRecipe(models.Model):
     class Meta:
         verbose_name = 'Ингредиент в рецепте'
         verbose_name_plural = 'Ингредиенты в рецептах'
+        constraints = [
+            UniqueConstraint(fields=['recipe', 'ingredient'],
+                             name='unique_recipe_ingredient')
+        ]
 
 
 class ShoppingCart(models.Model):

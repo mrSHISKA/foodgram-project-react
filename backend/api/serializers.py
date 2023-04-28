@@ -1,9 +1,12 @@
 import base64
+
 from django.contrib.auth import get_user_model
-from djoser.serializers import UserCreateSerializer, UserSerializer
-from rest_framework import serializers
-from recipes.models import Recipe, Ingredient, Tag, IngredientRecipe
 from django.core.files.base import ContentFile
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from rest_framework import serializers, status
+
+from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
+from users.models import Subscribe
 
 User = get_user_model()
 
@@ -61,6 +64,21 @@ class SubscribeSerializer(CustomUserSerializer):
         fields = ('id', 'email', 'username', 'first_name', 'last_name',
                   'is_subscribed', 'recipes', 'recipes_count')
         read_only_fields = ('email', 'username', 'first_name', 'last_name')
+
+    def validate(self, attrs):
+        author = self.instance
+        user = self.context.get('request').user
+        if Subscribe.objects.filter(author=author, user=user).exists():
+            raise serializers.ValidationError(
+                'Вы уже подписаны на этого пользователя',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        if user == author:
+            raise serializers.ValidationError(
+                'Вы пытаетесь подписаться на самого себя',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        return attrs
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
@@ -148,9 +166,14 @@ class RecipeWtiteSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         ingredients = attrs.get('ingredients', [])
         ingredients_id = []
+        if not ingredients:
+            raise serializers.ValidationError(
+                "ингредиенты обязательны для добавления")
+        if not attrs.get('tags'):
+            raise serializers.ValidationError("теги обязательны")
         if attrs.get('cooking_time') <= 0:
             raise serializers.ValidationError(
-                {"cooking_time": "время приготовления не может быть <= 0"})
+                "время приготовления не может быть <= 0")
         for item in ingredients:
             now_id = item.get('id')
             amount = item.get('amount')
@@ -158,22 +181,32 @@ class RecipeWtiteSerializer(serializers.ModelSerializer):
                 ingredients_id.append(now_id)
             else:
                 raise serializers.ValidationError(
-                    {"id": "нельзя добавить два одинаковых ингредиента"})
+                    "нельзя добавить два одинаковых ингредиента")
             if amount <= 0:
                 raise serializers.ValidationError(
-                    {"amount": "количество ингредиентов не может быть <= 0"})
+                    "количество ингредиентов не может быть <= 0")
         return attrs
+
+    def create_ingredients(self, ingredients, recipe):
+        ingredients_recipes = []
+        for ingredient in ingredients:
+            ingredients_recipes.append(
+                IngredientRecipe(
+                    ingredient=ingredient.get('id'),
+                    recipe=recipe,
+                    amount=ingredient.get('amount')
+                )
+            )
+        return ingredients_recipes
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.add(*tags)
-        for ingredient in ingredients:
-            IngredientRecipe.objects.create(
-                ingredient=ingredient.get('id'),
-                recipe=recipe,
-                amount=ingredient.get('amount'))
+        IngredientRecipe.objects.bulk_create(self.create_ingredients
+                                             (recipe=recipe,
+                                              ingredients=ingredients))
         return recipe
 
     def update(self, instance, validated_data):
@@ -184,11 +217,9 @@ class RecipeWtiteSerializer(serializers.ModelSerializer):
         IngredientRecipe.objects.filter(recipe=instance).delete()
         for field, value in validated_data.items():
             setattr(instance, field, value)
-        for ingredient in ingredients:
-            IngredientRecipe.objects.create(
-                ingredient=ingredient.get('id'),
-                recipe=instance,
-                amount=ingredient.get('amount'))
+        IngredientRecipe.objects.bulk_create(self.create_ingredients
+                                             (recipe=instance,
+                                              ingredients=ingredients))
         instance.save()
         return instance
 
