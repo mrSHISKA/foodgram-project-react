@@ -187,7 +187,7 @@ class RecipeWtiteSerializer(serializers.ModelSerializer):
                     "количество ингредиентов не может быть <= 0")
         return attrs
 
-    def create_ingredients(self, ingredients, recipe):
+    def get_ingredients(self, ingredients, recipe):
         ingredients_recipes = []
         for ingredient in ingredients:
             ingredients_recipes.append(
