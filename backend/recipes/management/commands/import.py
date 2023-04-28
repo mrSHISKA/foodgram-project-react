@@ -6,7 +6,7 @@ from recipes.models import Ingredient
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        file = open('../data/ingredients.csv', 'r', encoding='utf-8')
+        file = open('./recipes/ingredients.csv', 'r', encoding='utf-8')
         reader = csv.reader(file)
         count_data = 0
 
