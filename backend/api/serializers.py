@@ -3,9 +3,8 @@ import base64
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from rest_framework import serializers, status
-
 from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
+from rest_framework import serializers, status
 from users.models import Subscribe
 
 User = get_user_model()
