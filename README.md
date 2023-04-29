@@ -76,4 +76,3 @@ http://158.160.27.72/ админка: makcim127@mail.ru, 1234qwert
 
 ### Разработчики:
 **[Максим Титов](https://github.com/mrSHISKA)**. Backend и настройка CI/CD проекта. 
-
