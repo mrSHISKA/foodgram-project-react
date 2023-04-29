@@ -1,6 +1,6 @@
 # Foodgram
 
-<img src="https://github.com/mrSHISKA/foodgram-project-react/blob/master/.github/workflows/foodgram_workflow.ymlbadge.svg" alt="Foodgram_workflow" style="max-width: 100%;">
+<img src="https://github.com/mrSHISKA/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg" alt="Foodgram_workflow" style="max-width: 100%;">
 
 ### Краткое описание финального проекта по API:
 
