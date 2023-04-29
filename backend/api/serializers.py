@@ -203,7 +203,7 @@ class RecipeWtiteSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.add(*tags)
-        IngredientRecipe.objects.bulk_create(self.create_ingredients
+        IngredientRecipe.objects.bulk_create(self.get_ingredients
                                              (recipe=recipe,
                                               ingredients=ingredients))
         return recipe
@@ -216,7 +216,7 @@ class RecipeWtiteSerializer(serializers.ModelSerializer):
         IngredientRecipe.objects.filter(recipe=instance).delete()
         for field, value in validated_data.items():
             setattr(instance, field, value)
-        IngredientRecipe.objects.bulk_create(self.create_ingredients
+        IngredientRecipe.objects.bulk_create(self.get_ingredients
                                              (recipe=instance,
                                               ingredients=ingredients))
         instance.save()
