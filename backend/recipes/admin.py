@@ -16,11 +16,18 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ('name', 'color', 'slug')
 
 
+class IngredientRecipeInline(admin.TabularInline):
+    model = IngredientRecipe
+    extra = 0
+    min_num = 1
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'author',)
     list_filter = ('author', 'name', 'tags')
     readonly_fields = ['added_to_favorites']
+    inlines = [IngredientRecipeInline]
 
     def added_to_favorites(self, obj):
         return Favorite.objects.filter(recipe=obj).count()

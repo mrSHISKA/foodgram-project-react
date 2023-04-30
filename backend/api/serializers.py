@@ -155,6 +155,7 @@ class RecipeWtiteSerializer(serializers.ModelSerializer):
                                               queryset=Tag.objects.all())
     ingredients = IngredientRecipeWriteSerializer(many=True)
     image = Base64ImageField()
+    cooking_time = serializers.IntegerField()
 
     class Meta:
         model = Recipe
