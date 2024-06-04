@@ -72,7 +72,5 @@ sudo docker-compose exec backend python manage.py import
 Python, Django, Django REST Framework, PostgreSQL, Nginx, Docker, GitHub Actions
 ## Развернутый проект можно посмотреть по ссылке:
 
-http://158.160.27.72/ админка: makcim127@mail.ru, 1234qwert
-
 ### Разработчики:
 **[Максим Титов](https://github.com/mrSHISKA)**. Backend и настройка CI/CD проекта. 
